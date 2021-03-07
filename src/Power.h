@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <Lanes.h>
+
 #ifndef Power_h
 #define Power_h
 
@@ -15,7 +17,7 @@ public:
     bool trackHasPower(int index);
     void turnOffPower(int index);
     void turnOnPower(int index);
-    void handle(String cmd);
+    void handle(Lanes &lane, String cmd);
 };
 
 #endif

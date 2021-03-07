@@ -23,7 +23,7 @@ void loop() {
     // handle input from PCLapCounter
     if (interface.update()) {
         String action = interface.getAction();
-        power.handle(action);
+        power.handle(lanes, action);
         lights.handle(action);
     }
 
