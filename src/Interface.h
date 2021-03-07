@@ -4,11 +4,11 @@
 #define Interface_h
 
 class Interface {
-    public:
-      Interface();
-      Interface(int _baudrate);
-      bool update();
-      String getAction();
-      static void write(String cmd);
+public:
+    Interface();
+    Interface(int _baudrate);
+    bool update();
+    String getAction();
+    static void write(String cmd);
 };
 #endif

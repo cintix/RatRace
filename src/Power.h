@@ -1,17 +1,16 @@
-#include <Interface.h>
-
+#include <Arduino.h>
 #ifndef Power_h
 #define Power_h
 
 class Power {
-  private:
+private:
     void setup(int size);
-  private:
+private:
     int asciiToInt(char c);
-  public:
+public:
     int *rele;
     bool *powerIndex;
-  public:
+public:
     Power(int *_rele, int count);
     bool trackHasPower(int index);
     void turnOffPower(int index);

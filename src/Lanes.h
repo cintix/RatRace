@@ -5,13 +5,13 @@
 #define Lanes_h
 
 class Lanes {
-  public:
+public:
     Lanes(int * _lanes, int count);
     void update(Power &power);
     void handle(String cmd);
     void setPenaltyTime(int value);
     void setMinimumSpeederPower(int value);
-  private:
+private:
     int lanesCount;
     int *lanes;
     int penaltyTimeoutValue;
@@ -25,7 +25,7 @@ class Lanes {
     unsigned long currentGoTime;
     bool waitingToGo = false;
     bool startGiven = false;
-  private:
+private:
     void validateFalseStart(Power &power);
 };
 

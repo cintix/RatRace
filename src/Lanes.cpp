@@ -3,33 +3,33 @@
 #include <Interface.h>
 
 Lanes::Lanes(int *_lanes, int count) {
-  lanesCount = count;
-  lanes = _lanes;
+    lanesCount = count;
+    lanes = _lanes;
 
-  bool _laneStatus[count];
-  laneStatus = _laneStatus;
+    bool _laneStatus[count];
+    laneStatus = _laneStatus;
 
-  bool _laneFlag[count];
-  laneFlag = _laneFlag;
+    bool _laneFlag[count];
+    laneFlag = _laneFlag;
 
-  bool _penalty[count];
-  penalty = _penalty;
+    bool _penalty[count];
+    penalty = _penalty;
 
-  unsigned long _roundTrips[count];
-  roundTrips = _roundTrips;
+    unsigned long _roundTrips[count];
+    roundTrips = _roundTrips;
 
-  unsigned long _penaltyTimeout[count];
-  penaltyTimeout = _penaltyTimeout;
+    unsigned long _penaltyTimeout[count];
+    penaltyTimeout = _penaltyTimeout;
 
-  for (int index = 0; index < count; index++) {
-      pinMode(lanes[index], INPUT);
-      laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
-  }
-  
+    for (int index = 0; index < count; index++) {
+        pinMode(lanes[index], INPUT);
+        laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
+    }
+
 }
 
 void Lanes::setMinimumSpeederPower(int value) {
-  minimumSpeederPower = value;
+    minimumSpeederPower = value;
 }
 
 void Lanes::setPenaltyTime(int value) {
@@ -37,59 +37,59 @@ void Lanes::setPenaltyTime(int value) {
 }
 
 void Lanes::handle(String cmd) {
-     if (cmd =="SL051") {
-         waitingToGo = true;
-     }
+    if (cmd =="SL051") {
+        waitingToGo = true;
+    }
 
-     if (cmd =="SL070") {
-         waitingToGo = false;
-     }
+    if (cmd =="SL070") {
+        waitingToGo = false;
+    }
 
-     if (cmd =="SL060") {
-         startGiven = false;
-     }
+    if (cmd =="SL060") {
+        startGiven = false;
+    }
 
-     if (cmd =="SL061") {
-         startGiven = true;
-         currentGoTime = millis();
-     }
+    if (cmd =="SL061") {
+        startGiven = true;
+        currentGoTime = millis();
+    }
 }
 
 
 void Lanes::update(Power &power) {
 
-  for (int index = 0; index < lanesCount; index++) {
-      laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
-  }
+    for (int index = 0; index < lanesCount; index++) {
+        laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
+    }
 
-  validateFalseStart(power);
+    validateFalseStart(power);
 
-  if (Lights::isGo || Lights::isStop) {
-     unsigned long currentTime = millis();
-     if (Lights::isGo) {
-       for (int index = 0; index < lanesCount; index++) {
-          unsigned long currentRoundTrip = currentTime - roundTrips[index];
-          if (laneStatus[index] && !laneFlag[index]  && (currentRoundTrip > minimumRoundTime)) {
-              laneFlag[index] = true;
-              roundTrips[index] = currentTime;
+    if (Lights::isGo || Lights::isStop) {
+        unsigned long currentTime = millis();
+        if (Lights::isGo) {
+            for (int index = 0; index < lanesCount; index++) {
+                unsigned long currentRoundTrip = currentTime - roundTrips[index];
+                if (laneStatus[index] && !laneFlag[index]  && (currentRoundTrip > minimumRoundTime)) {
+                    laneFlag[index] = true;
+                    roundTrips[index] = currentTime;
 
-              char buf[6];
-              sprintf(buf,"[SF0%d]", index +1);
-              Interface::write(buf);
-          }
-       }
+                    char buf[6];
+                    sprintf(buf,"[SF0%d]", index +1);
+                    Interface::write(buf);
+                }
+            }
 
-     }
-
-     for (int index = 0; index < lanesCount; index++) {
-        unsigned long currentRoundTrip = currentTime - roundTrips[index];
-        if (!laneStatus[index] && laneFlag[index]  && (currentRoundTrip > minimumRoundTime)) {
-            laneFlag[index] = false;
-            roundTrips[index] = currentTime;
         }
-     }
 
-  }
+        for (int index = 0; index < lanesCount; index++) {
+            unsigned long currentRoundTrip = currentTime - roundTrips[index];
+            if (!laneStatus[index] && laneFlag[index]  && (currentRoundTrip > minimumRoundTime)) {
+                laneFlag[index] = false;
+                roundTrips[index] = currentTime;
+            }
+        }
+
+    }
 
 }
 
