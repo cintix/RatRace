@@ -17,6 +17,8 @@ public:
     bool trackHasPower(int index);
     void turnOffPower(int index);
     void turnOnPower(int index);
+    void delayedTurnOnPower (int _delay, int index);
+    void delayedTurnOffPower(int _delay, int index);
     void handle(Lanes &lane, String cmd);
 };
 

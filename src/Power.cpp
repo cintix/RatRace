@@ -34,21 +34,41 @@ bool Power::trackHasPower(int index) {
 }
 
 /**
+ * delayedTurnOffPower function sets index pin LOW
+ * int _delay - time in milleseconds to delay the command
+ * int index - pin index number.
+ */
+void delayedTurnOffPower(int _delay, int index){
+    delay(_delay);
+    turnOffPower(index);
+}
+
+/**
+ * delayedTurnOnPower function sets index pin HIGH
+ * int _delay - time in milleseconds to delay the command
+ * int index - pin index number.
+ */
+void delayedTurnOnPower(int _delay, int index){
+    delay(_delay);
+    turnOnPower(index);
+}
+
+/**
  * turnOffPower function sets index pin LOW
  * int index - pin index number.
  */
 void Power::turnOffPower(int index) {
     powerIndex[index] = false;
-//    digitalWrite(rele[index], LOW);
+    digitalWrite(rele[index], LOW);
 }
 
 /**
- * turnOffPower function sets index pin HIGH
+ * turnOnPower function sets index pin HIGH
  * int index - pin index number.
  */
 void Power::turnOnPower(int index) {
     powerIndex[index] = false;
-//    digitalWrite(rele[index], HIGH);
+    digitalWrite(rele[index], HIGH);
 }
 
 /**
