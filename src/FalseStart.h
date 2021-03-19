@@ -1,16 +1,13 @@
 #include <Arduino.h>
-#include <Power.h>
-
 #ifndef FalseStart_h
 #define FalseStart_h
-
 class FalseStart {
 public:
     void setPenaltyTime(int value);
     void handle(String cmd);
     bool hasPenalty(int index);
     void setup(int size);
-    void validateLanes(int *lanes, Power &power);
+    bool validateLane(int lanePin, int laneIndex);
     void setMinimumSpeederPower(int value);
 private:
   int lanesCount;

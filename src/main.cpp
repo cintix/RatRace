@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Interface.h>
-#include <Power.h>
 #include <Lights.h>
 #include <Lanes.h>
 
@@ -11,8 +10,7 @@ int lanePins[] = {2, 3, 4, 5}; // all pins in order for lanes
 
 Interface interface(9600);     // interface(baudrate) to talk to PCLapCounter
 Lights lights(13, 10, 11, 12); // LED, Break, GO, STOP
-Power power(relePins, 4);
-Lanes lanes(lanePins, 4);
+Lanes lanes(lanePins, relePins, 4);
 
 void setup() {
   lanes.setPenaltyTime(3000); // 3 seconds penalty for false start.
@@ -20,13 +18,13 @@ void setup() {
 }
 
 void loop() {
-  // read lanes senors snd validate false start
-  lanes.update(power);
+  // read lanes senors and validate false start
+  lanes.update();
 
   // handle input from PCLapCounter
   if (interface.update()) {
     String action = interface.getAction();
-    power.handle(lanes, action);
+    lanes.handle(action);
     lights.handle(action);
   }
 }

@@ -54,33 +54,31 @@ void FalseStart::handle(String cmd) {
 }
 
 /**
- * validateLanes function
+ * validateLane function
  * Validates if a false start is being triggered.
- * int *lanes   - reference to lanes pins array
- *  Power power - reference to the power control
+ * int lane   - reference to lanes pins array
  */
-void FalseStart::validateLanes(int *lanes, Power &power) {
-    for (int index = 0; index < lanesCount; index++) {
-        if (!startGiven && waitingToGo && penaltyTimeout[index] < 1) {
-            power.turnOnPower(index);
-            if (analogRead(lanes[index]) > minimumSpeederPower) {
-                penaltyTimeout[index] = penaltyTimeoutValue;
-                power.turnOffPower(index);
+bool FalseStart::validateLane(int lanePin, int laneIndex) {
 
-                char buf[6];
-                sprintf(buf,"[SF0%d]", index +1);
-                Interface::write(buf);
-            }
-        }
-
-        unsigned long currentTimeNow = millis();
-        if (!waitingToGo && startGiven && penaltyTimeout[index] > 0) {
-            if (penaltyTimeout[index] < (currentTimeNow - currentGoTime)) {
-                penaltyTimeout[index] = 0;
-                power.turnOnPower(index);
-            }
-        }
+    if (!startGiven && waitingToGo && penaltyTimeout[laneIndex] < 1) {
+      if (analogRead(lanePin) > minimumSpeederPower) {
+        penaltyTimeout[laneIndex] = penaltyTimeoutValue;
+        char buf[6];
+        sprintf(buf, "[SF0%d]", laneIndex + 1);
+        Interface::write(buf);
+        return false;
+      }
     }
+
+    unsigned long currentTimeNow = millis();
+    if (!waitingToGo && startGiven && penaltyTimeout[laneIndex] > 0) {
+      if (penaltyTimeout[laneIndex] < (currentTimeNow - currentGoTime)) {
+        penaltyTimeout[laneIndex] = 0;
+        return true;
+      }
+    }
+  
+  return true;
 }
 
 /**

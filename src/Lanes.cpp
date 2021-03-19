@@ -1,31 +1,42 @@
 #include <Lanes.h>
 #include <Lights.h>
 #include <Interface.h>
+#define ASCII 48
 
 /**
  * Constructor for Lanes
  * int *_lanes - references to pin array on Arduino
  * int count   - amount of pins on array
  */
-Lanes::Lanes(int *_lanes, int count) {
-    lanesCount = count;
-    lanes = _lanes;
+Lanes::Lanes(int *_lanes, int *_rele, int count) {
+  lanesCount = count;
+  lanes = _lanes;
 
-    bool _laneStatus[count];
-    laneStatus = _laneStatus;
+  bool _laneStatus[count];
+  laneStatus = _laneStatus;
 
-    bool _laneFlag[count];
-    laneFlag = _laneFlag;
+  bool _laneFlag[count];
+  laneFlag = _laneFlag;
 
-    unsigned long _roundTrips[count];
-    roundTrips = _roundTrips;
+  unsigned long _roundTrips[count];
+  roundTrips = _roundTrips;
 
-    for (int index = 0; index < count; index++) {
-        pinMode(lanes[index], INPUT);
-        laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
-    }
+  for (int index = 0; index < count; index++) {
+    pinMode(lanes[index], INPUT);
+    laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
+  }
 
-    falseStart.setup(count);
+  falseStart.setup(count);
+
+  rele = _rele;
+  bool _powerIndex[count];
+  powerIndex = _powerIndex;
+
+  for (int index = 0; index < count; index++) {
+    pinMode(rele[index], OUTPUT);
+    powerIndex[index] = false;
+  }
+
 }
 
 /**
@@ -58,6 +69,24 @@ void Lanes::setPenaltyTime(int value) {
  */
 void Lanes::handle(String cmd) {
     falseStart.handle(cmd);
+
+    if (cmd.startsWith("PW0")) {
+      int _index = asciiToInt(cmd.charAt(3) - 1);
+      int _onOrOff = asciiToInt(cmd.charAt(4));
+
+      if (_onOrOff == 1 && laneHasPenalty(_index)) {
+        _onOrOff = 0;
+      }
+
+      if (_onOrOff == 1) {
+        powerIndex[_index] = true;
+        digitalWrite(rele[_index], LOW);
+      } else {
+        powerIndex[_index] = false;
+        digitalWrite(rele[_index], HIGH);
+      }
+    }
+
 }
 
 /**
@@ -65,13 +94,15 @@ void Lanes::handle(String cmd) {
  * Reads state of the PINs from Arduino
  * Power power - reference to power control.
  */
-void Lanes::update(Power &power) {
+void Lanes::update() {
 
     for (int index = 0; index < lanesCount; index++) {
         laneStatus[index] = (digitalRead(lanes[index]) == HIGH) ? true : false;
     }
 
-    falseStart.validateLanes(lanes, power);
+    for (int index = 0; index < lanesCount; index++) {
+      digitalWrite(lanes[index],(falseStart.validateLane(lanes[index], index)) ? HIGH : LOW);
+    }
 
     if (Lights::isGo || Lights::isStop) {
         unsigned long currentTime = millis();
@@ -100,4 +131,58 @@ void Lanes::update(Power &power) {
 
     }
 
+}
+
+/**
+ * asciiToInt function - converts a single Ascii character to a int
+ * char c - character to convert
+ */
+int Lanes::asciiToInt(char c) {
+  int value = int(c - ASCII);
+  return value;
+}
+
+/**
+ * trackHasPower function
+ * int index - pin index number.
+ * returns if the requested index is HIGH
+ */
+bool Lanes::trackHasPower(int index) { return powerIndex[index]; }
+
+/**
+ * delayedTurnOffPower function sets index pin LOW
+ * int _delay - time in milleseconds to delay the command
+ * int index - pin index number.
+ */
+void Lanes::delayedTurnOffPower(int _delay, int index) {
+  delay(_delay);
+  turnOffPower(index);
+}
+
+/**
+ * delayedTurnOnPower function sets index pin HIGH
+ * int _delay - time in milleseconds to delay the command
+ * int index - pin index number.
+ */
+void Lanes::delayedTurnOnPower(int _delay, int index) {
+  delay(_delay);
+  turnOnPower(index);
+}
+
+/**
+ * turnOffPower function sets index pin LOW
+ * int index - pin index number.
+ */
+void Lanes::turnOffPower(int index) {
+  powerIndex[index] = false;
+  digitalWrite(rele[index], LOW);
+}
+
+/**
+ * turnOnPower function sets index pin HIGH
+ * int index - pin index number.
+ */
+void Lanes::turnOnPower(int index) {
+  powerIndex[index] = false;
+  digitalWrite(rele[index], HIGH);
 }
